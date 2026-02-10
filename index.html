@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#c0c0c0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BMI Calculator">
+    <title>BMI Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'VT323', 'Courier New', monospace;
+            background: linear-gradient(135deg, #c0c0c0 0%, #e6f2ff 100%);
+            min-height: 100vh;
+            height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow-x: hidden;
+            margin: 0;
+        }
+        
+        /* iOS Safari viewport fix */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+                height: -webkit-fill-available;
+            }
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(228, 228, 231, 0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(228, 228, 231, 0.4) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 20%, rgba(192, 192, 192, 0.3));
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0, 0, 0, 0.015) 3px, rgba(0, 0, 0, 0.015) 5px),
+                repeating-linear-gradient(23deg, transparent, transparent 7px, rgba(0, 0, 0, 0.01) 7px, rgba(0, 0, 0, 0.01) 8px),
+                linear-gradient(180deg, #e8e8e8 0%, #d4d4d4 100%);
+            border-radius: 16px;
+            padding: 24px 20px;
+            box-shadow: rgba(14, 63, 126, 0.04) 0px 0px 0px 1px, rgba(42, 51, 69, 0.04) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.04) 0px 6px 6px -3px, rgba(14, 63, 126, 0.04) 0px 12px 12px -6px, rgba(14, 63, 126, 0.04) 0px 24px 24px -12px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            position: relative;
+            cursor: default;
+        }
+
+        h1:hover::after {
+            content: 'with a hidden game 🎮';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #2c3e50;
+            white-space: nowrap;
+            animation: tooltipFadeIn 0.3s ease;
+            pointer-events: none;
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-8px);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .subtitle span {
+            text-decoration: underline;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .subtitle span:hover {
+            opacity: 1;
+        }
+
+        .bio-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .bio-modal.active {
+            display: flex;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .bio-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px 28px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .bio-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #2c3e50;
+            transition: background 0.2s ease;
+        }
+
+        .bio-close:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Name input modal */
+        .name-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .name-modal.active {
+            display: flex;
+        }
+
+        .name-modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px 24px;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .name-modal-title {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .name-modal-subtitle {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .name-input-group {
+            margin-bottom: 20px;
+        }
+
+        .name-input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            background: white;
+            transition: border-color 0.2s ease;
+            text-align: center;
+        }
+
+        .name-input-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .name-submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .name-submit-btn:active {
+            transform: translateY(2px);
+        }
+
+        .name-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .bio-title {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .bio-text {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 12px;
+        }
+
+        .xray-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .xray-preview::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-size: 20px 20px;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.4) 1.5px, transparent 1.5px);
+            pointer-events: none;
+            z-index: 1;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            transition: opacity 0.3s ease;
+        }
+
+        .xray-preview.calculating::before {
+            animation: dotPulse 1s ease-in-out;
+        }
+
+        .xray-preview.calculating.underweight::before {
+            animation: dotPulseUnderweight 1s ease-in-out;
+        }
+
+        .xray-preview.calculating.normal::before {
+            animation: dotPulseNormal 1s ease-in-out;
+        }
+
+        .xray-preview.calculating.overweight::before {
+            animation: dotPulseOverweight 1s ease-in-out;
+        }
+
+        .xray-preview.calculating.obese::before {
+            animation: dotPulseObese 1s ease-in-out;
+        }
+
+        @keyframes dotPulseUnderweight {
+            0%, 100% {
+                background-image: radial-gradient(rgba(255, 255, 255, 0.4) 1.5px, transparent 1.5px);
+            }
+            25% {
+                background-image: radial-gradient(rgba(90, 180, 255, 0.7) 1.65px, transparent 1.65px);
+            }
+            50% {
+                background-image: radial-gradient(rgba(90, 180, 255, 0.9) 1.8px, transparent 1.8px);
+            }
+            75% {
+                background-image: radial-gradient(rgba(90, 180, 255, 0.7) 1.65px, transparent 1.65px);
+            }
+        }
+
+        @keyframes dotPulseNormal {
+            0%, 100% {
+                background-image: radial-gradient(rgba(255, 255, 255, 0.4) 1.5px, transparent 1.5px);
+            }
+            25% {
+                background-image: radial-gradient(rgba(74, 222, 128, 0.7) 1.65px, transparent 1.65px);
+            }
+            50% {
+                background-image: radial-gradient(rgba(74, 222, 128, 0.9) 1.8px, transparent 1.8px);
+            }
+            75% {
+                background-image: radial-gradient(rgba(74, 222, 128, 0.7) 1.65px, transparent 1.65px);
+            }
+        }
+
+        @keyframes dotPulseOverweight {
+            0%, 100% {
+                background-image: radial-gradient(rgba(255, 255, 255, 0.4) 1.5px, transparent 1.5px);
+            }
+            25% {
+                background-image: radial-gradient(rgba(251, 191, 36, 0.7) 1.65px, transparent 1.65px);
+            }
+            50% {
+                background-image: radial-gradient(rgba(251, 191, 36, 0.9) 1.8px, transparent 1.8px);
+            }
+            75% {
+                background-image: radial-gradient(rgba(251, 191, 36, 0.7) 1.65px, transparent 1.65px);
+            }
+        }
+
+        @keyframes dotPulseObese {
+            0%, 100% {
+                background-image: radial-gradient(rgba(255, 255, 255, 0.4) 1.5px, transparent 1.5px);
+            }
+            25% {
+                background-image: radial-gradient(rgba(248, 113, 113, 0.7) 1.65px, transparent 1.65px);
+            }
+            50% {
+                background-image: radial-gradient(rgba(248, 113, 113, 0.9) 1.8px, transparent 1.8px);
+            }
+            75% {
+                background-image: radial-gradient(rgba(248, 113, 113, 0.7) 1.65px, transparent 1.65px);
+            }
+        }
+
+        .carousel-slide:nth-child(2) .xray-preview::before {
+            opacity: 0;
+        }
+
+        .xray-preview::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-size: 20px 20px;
+            background-image: radial-gradient(#E6E6E6 1px, transparent 1px);
+            pointer-events: none;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .carousel-slide:nth-child(2) .xray-preview::before {
+            display: none;
+        }
+
+        .rain-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            pointer-events: none;
+            z-index: 50;
+            overflow: hidden;
+        }
+
+        @keyframes float-down {
+            0% {
+                transform: translateY(0) scaleY(0.2);
+                opacity: 0;
+            }
+            5% { opacity: 1; }
+            95% { opacity: 0.8; }
+            100% {
+                transform: translateY(200%) scaleY(3);
+                opacity: 0;
+            }
+        }
+
+        .glow-dot {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            border-radius: 0 0 50% 50%;
+            pointer-events: none;
+            animation: float-down 1.5s linear forwards;
+            z-index: 100;
+            top: 0;
+        }
+
+        .glow-dot::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .glow-dot.underweight {
+            background: linear-gradient(0deg, #5ab4ff, transparent);
+            color: #5ab4ff;
+        }
+
+        .glow-dot.normal {
+            background: linear-gradient(0deg, #4ade80, transparent);
+            color: #4ade80;
+        }
+
+        .glow-dot.overweight {
+            background: linear-gradient(0deg, #fbbf24, transparent);
+            color: #fbbf24;
+        }
+
+        .glow-dot.obese {
+            background: linear-gradient(0deg, #f87171, transparent);
+            color: #f87171;
+        }
+
+        .carousel-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            touch-action: pan-y;
+        }
+
+        .carousel-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+        }
+
+        .waveform {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 100%;
+            width: 100%;
+            transition: all 0.5s ease;
+        }
+
+        .waveform-row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .waveform-bar {
+            height: 8px;
+            background: linear-gradient(90deg, rgba(180, 210, 245, 0.95), rgba(120, 170, 220, 0.9));
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(140, 180, 230, 0.5);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .waveform.default .waveform-bar {
+            background: linear-gradient(90deg, rgba(220, 225, 235, 0.95), rgba(200, 210, 220, 0.9));
+        }
+
+        .waveform-bar.single { width: 25px; }
+        .waveform-bar.head-middle { width: 32px; }
+        .waveform-bar.double { width: 30px; }
+        .waveform-bar.triple { width: 65px; }
+        .waveform-bar.arm { width: 18px; }
+
+        .arm-left {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-54px);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .arm-right {
+            position: absolute;
+            right: 50%;
+            transform: translateX(54px);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .waveform.underweight .waveform-bar.single { width: 20px; }
+        .waveform.underweight .waveform-bar.head-middle { width: 23px; }
+        .waveform.underweight .waveform-bar.double { width: 24px; }
+        .waveform.underweight .waveform-bar.triple { width: 52px; }
+        .waveform.underweight .waveform-bar.arm { width: 14px; }
+        .waveform.underweight .arm-left { transform: translateX(-44px); }
+        .waveform.underweight .arm-right { transform: translateX(44px); }
+        .waveform.underweight .waveform-bar {
+            background: linear-gradient(90deg, rgba(140, 190, 245, 0.9), rgba(90, 150, 210, 0.85));
+        }
+
+        .waveform.normal .waveform-bar.single { width: 25px; }
+        .waveform.normal .waveform-bar.head-middle { width: 32px; }
+        .waveform.normal .waveform-bar.double { width: 30px; }
+        .waveform.normal .waveform-bar.triple { width: 65px; }
+        .waveform.normal .waveform-bar.arm { width: 18px; }
+        .waveform.normal .arm-left { transform: translateX(-54px); }
+        .waveform.normal .arm-right { transform: translateX(54px); }
+        .waveform.normal .waveform-bar {
+            background: linear-gradient(90deg, rgba(120, 220, 180, 0.95), rgba(80, 180, 140, 0.9));
+        }
+
+        .waveform.overweight .waveform-bar.single { width: 30px; }
+        .waveform.overweight .waveform-bar.head-middle { width: 38px; }
+        .waveform.overweight .waveform-bar.double { width: 36px; }
+        .waveform.overweight .waveform-bar.triple { width: 78px; }
+        .waveform.overweight .waveform-bar.arm { width: 22px; }
+        .waveform.overweight .arm-left { transform: translateX(-64px); }
+        .waveform.overweight .arm-right { transform: translateX(64px); }
+        .waveform.overweight .waveform-bar {
+            background: linear-gradient(90deg, rgba(255, 200, 100, 0.95), rgba(230, 170, 70, 0.9));
+        }
+
+        .waveform.obese .waveform-bar.single { width: 35px; }
+        .waveform.obese .waveform-bar.head-middle { width: 44px; }
+        .waveform.obese .waveform-bar.double { width: 42px; }
+        .waveform.obese .waveform-bar.triple { width: 90px; }
+        .waveform.obese .waveform-bar.arm { width: 26px; }
+        .waveform.obese .arm-left { transform: translateX(-73px); }
+        .waveform.obese .arm-right { transform: translateX(73px); }
+        .waveform.obese .waveform-bar {
+            background: linear-gradient(90deg, rgba(255, 140, 140, 0.95), rgba(230, 100, 100, 0.9));
+        }
+
+        .bmi-table {
+            width: 90%;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .bmi-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+        }
+
+        .bmi-label {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+            flex-shrink: 0;
+        }
+
+        .color-dot.underweight { background: #5ab4ff; color: #5ab4ff; }
+        .color-dot.normal { background: #4ade80; color: #4ade80; }
+        .color-dot.overweight { background: #fbbf24; color: #fbbf24; }
+        .color-dot.obese { background: #f87171; color: #f87171; }
+
+        .bmi-range {
+            opacity: 0.8;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            overflow: hidden;
+        }
+
+        .game-area.game-over {
+            display: none;
+        }
+
+        .game-lives {
+            display: none;
+        }
+
+        .overlay-lives {
+            display: flex;
+            gap: 6px;
+            font-size: 24px;
+            margin-top: 10px;
+        }
+
+        .life-lost-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            gap: 20px;
+            pointer-events: none;
+        }
+
+        .life-lost-overlay.active {
+            display: flex;
+            pointer-events: all;
+        }
+
+        .life-lost-message {
+            color: #f87171;
+            font-size: 32px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(248, 113, 113, 0.8);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .lives-remaining {
+            color: #ffffff;
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .continue-btn {
+            display: none;
+        }
+
+        .leaderboard {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .leaderboard.active {
+            display: block;
+        }
+
+        .leaderboard-title {
+            color: #ffffff;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .share-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .share-btn:hover {
+            opacity: 1;
+        }
+
+        .share-btn:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        .share-btn svg {
+            width: 100%;
+            height: 100%;
+            fill: #ffffff;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item.latest {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.2));
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            animation: highlight 1s ease-in-out 3;
+        }
+
+        @keyframes highlight {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .leaderboard-rank {
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .leaderboard-score {
+            font-weight: 600;
+        }
+
+        .leaderboard-item.latest .leaderboard-score {
+            color: #4ade80;
+        }
+        
+        /* Name prompt modal */
+        .name-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        .name-modal.active {
+            display: flex;
+        }
+        
+        .name-modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px 28px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        .name-modal-title {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: clamp(24px, 6vw, 28px);
+            color: #2c3e50;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .name-modal-text {
+            font-family: 'VT323', 'Courier New', monospace;
+            font-size: clamp(16px, 4vw, 18px);
+            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: white;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'VT323', monospace;
+            color: #2c3e50;
+            transition: border-color 0.2s ease;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .name-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+        
+        .name-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .name-modal-btn {
+            flex: 1;
+            padding: 16px;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            touch-action: manipulation;
+        }
+        
+        .name-modal-btn.cancel {
+            background: linear-gradient(180deg, #f8f8f8 0%, #e8e8e8 100%);
+            color: #4a5568;
+        }
+        
+        .name-modal-btn.cancel:active {
+            background: linear-gradient(180deg, #e8e8e8 0%, #d8d8d8 100%);
+        }
+        
+        .name-modal-btn.confirm {
+            background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+        }
+        
+        .name-modal-btn.confirm:active {
+            background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+        }
+
+        .game-character {
+            position: absolute;
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            transition: left 0.1s linear;
+            user-select: none;
+        }
+
+        .game-start-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffffff;
+            font-size: 28px;
+            letter-spacing: 2px;
+            line-height: 1.4;
+            pointer-events: none;
+            padding: 40px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .game-start-message.hidden {
+            display: none;
+        }
+
+        .game-start-emoji {
+            font-size: 48px;
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .food-types {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+        
+        .food-type {
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .food-type.healthy {
+            color: #4ade80;
+        }
+        
+        .food-type.unhealthy {
+            color: #f87171;
+        }
+
+        .game-item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-popup {
+            position: absolute;
+            font-size: 24px;
+            font-weight: 600;
+            pointer-events: none;
+            animation: scoreFloat 1s ease-out forwards;
+            z-index: 100;
+        }
+
+        .score-popup.positive {
+            color: #4ade80;
+            text-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+        }
+
+        .score-popup.negative {
+            color: #f87171;
+            text-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
+        }
+
+        @keyframes scoreFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.2);
+            }
+        }
+
+        .result {
+            padding: 8px 14px;
+            background: linear-gradient(180deg, rgba(40, 40, 40, 0.95) 0%, rgba(20, 20, 20, 0.98) 100%);
+            border-top: 1px solid #444;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .carousel-nav {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .carousel-nav:active:not(.disabled) {
+            transform: scale(0.9);
+        }
+
+        .carousel-nav.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .carousel-nav.game-active {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .chevron {
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .chevron.left {
+            border-width: 7px 9px 7px 0;
+            border-color: transparent #ffffff transparent transparent;
+        }
+
+        .chevron.right {
+            border-width: 7px 0 7px 9px;
+            border-color: transparent transparent transparent #ffffff;
+        }
+
+        .result-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .bmi-value {
+            font-size: 38px;
+            font-weight: 400;
+            color: #e0e0e0;
+            text-shadow: 0 0 8px rgba(180, 210, 240, 0.6);
+            line-height: 1;
+        }
+
+        .game-score {
+            font-size: 38px;
+            font-weight: 400;
+            color: #e0e0e0;
+            text-shadow: 0 0 8px rgba(180, 210, 240, 0.6);
+            line-height: 1;
+            display: none;
+        }
+
+        .game-label {
+            font-size: 18px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px currentColor;
+            color: #ffffff;
+            line-height: 1;
+            margin-top: 2px;
+            display: none;
+        }
+
+        .bmi-category {
+            font-size: 18px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 6px currentColor;
+            color: #ffffff;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        .underweight { color: #5ab4ff; }
+        .normal { color: #4ade80; }
+        .overweight { color: #fbbf24; }
+        .obese { color: #f87171; }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            word-spacing: -2px;
+        }
+
+        .instructions {
+            display: none;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            height: 77px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .instructions.active {
+            display: flex;
+        }
+
+        .instructions-text {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            font-size: 20px;
+            border: 1px solid #b0b8c0;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: inherit;
+            color: #2c3e50;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #5a9fd4;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(90, 159, 212, 0.2);
+        }
+
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input::placeholder {
+            opacity: 0.4;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            height: 58px;
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            font-family: inherit;
+            transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.filled {
+            background: linear-gradient(135deg, #5a9fd4 0%, #4a8fc4 50%, #3a7fb4 100%);
+            border: 1px solid rgba(90, 159, 212, 0.5);
+        }
+
+        button.filled:hover {
+            background: linear-gradient(135deg, #4a8fc4 0%, #3a7fb4 50%, #2a6fa4 100%);
+        }
+        
+        button.start-game {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+        
+        button.start-game:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%);
+        }
+        
+        @keyframes textFlicker {
+            0%, 100% { opacity: 1; }
+            25% { opacity: 0.3; }
+            50% { opacity: 1; }
+            75% { opacity: 0.5; }
+        }
+        
+        button.start-game.flicker-text {
+            animation: none;
+        }
+        
+        button.start-game.flicker-text::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: textFlicker 0.8s infinite;
+        }
+        
+        button.start-game {
+            position: relative;
+        }
+        
+        button.start-game.flicker-text .button-text {
+            animation: textFlicker 0.8s infinite;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Loading animation for calculate button */
+        .loader {
+            width: 40px;
+            height: 6px;
+            -webkit-mask: linear-gradient(90deg, #000 70%, #0000 0) left/20% 100%;
+            mask: linear-gradient(90deg, #000 70%, #0000 0) left/20% 100%;
+            background:
+                linear-gradient(#FFF 0 0) left -25% top 0 /20% 100% no-repeat
+                rgba(255, 255, 255, 0.3);
+            animation: progressBar 1s infinite steps(6);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes progressBar {
+            100% { background-position: right -25% top 0 }
+        }
+        
+        button.calculating {
+            pointer-events: none;
+            opacity: 0.9;
+            position: relative;
+        }
+        
+        button.calculating .button-text {
+            opacity: 0;
+        }
+        
+        button.calculating .loader {
+            display: block;
+        }
+        
+        button .loader {
+            display: none;
+        }
+
+        .game-controls {
+            display: none;
+            width: 100%;
+            gap: 12px;
+        }
+
+        .game-controls.active {
+            display: flex;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 22px;
+            font-weight: 400;
+            color: #ffffff;
+            background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+            border: 1px solid rgba(60, 60, 60, 0.5);
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            font-family: inherit;
+            transition: all 0.1s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%);
+        }
+
+        .footer-credit {
+            display: none;
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .bmi-value, .game-score {
+                font-size: 38px;
+            }
+            
+            .bmi-category {
+                font-size: 18px;
+            }
+            
+            input {
+                padding: 14px;
+                font-size: 18px;
+            }
+            
+            button {
+                padding: 16px;
+                font-size: 20px;
+            }
+            
+            .control-btn {
+                padding: 16px;
+                font-size: 20px;
+            }
+        }
+        
+        /* Better touch targets on all mobile devices */
+        @media (max-width: 480px) {
+            .carousel-nav {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .bio-close {
+                width: 44px;
+                height: 44px;
+                font-size: 24px;
+            }
+            
+            input {
+                font-size: 18px;
+                padding: 16px;
+            }
+        }
+        
+        /* Accessibility - respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BMI Calculator</h1>
+        <p class="subtitle">by <span id="authorName">GhulamRusli</span></p>
+        
+        <div class="xray-preview">
+            <div class="rain-container" id="rainContainer"></div>
+            
+            <div class="carousel-container">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="carousel-slide">
+                        <div class="cell-container">
+                            <div class="waveform default" id="waveformViz"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <div class="bmi-table">
+                            <div class="bmi-row">
+                                <span class="bmi-label">
+                                    <span class="color-dot underweight"></span>
+                                    Underweight
+                                </span>
+                                <span class="bmi-range">&lt; 18.5</span>
+                            </div>
+                            <div class="bmi-row">
+                                <span class="bmi-label">
+                                    <span class="color-dot normal"></span>
+                                    Normal
+                                </span>
+                                <span class="bmi-range">18.5 - 24.9</span>
+                            </div>
+                            <div class="bmi-row">
+                                <span class="bmi-label">
+                                    <span class="color-dot overweight"></span>
+                                    Overweight
+                                </span>
+                                <span class="bmi-range">25.0 - 29.9</span>
+                            </div>
+                            <div class="bmi-row">
+                                <span class="bmi-label">
+                                    <span class="color-dot obese"></span>
+                                    Obese
+                                </span>
+                                <span class="bmi-range">&ge; 30.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <div class="game-container">
+                            <div class="game-area" id="gameArea">
+                                <div class="game-start-message" id="gameStartMessage">
+                                    Let's catch some food!
+                                    <span class="game-start-emoji">👐</span>
+                                    <div class="food-types">
+                                        <span class="food-type healthy">Healthy food (+1)</span>
+                                        <span class="food-type unhealthy">Unhealthy food (-1)</span>
+                                    </div>
+                                </div>
+                                <div class="game-lives" id="gameLives"></div>
+                                <div class="game-character" id="gameCharacter"></div>
+                                <div class="life-lost-overlay" id="lifeLostOverlay">
+                                    <div class="life-lost-message">LIFE LOST!</div>
+                                    <div class="lives-remaining" id="livesRemaining"></div>
+                                    <div class="overlay-lives" id="overlayLives"></div>
+                                </div>
+                            </div>
+                            <div class="leaderboard" id="leaderboard">
+                                <div class="leaderboard-title">
+                                    Leaderboard
+                                    <div class="share-btn" id="shareBtn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="leaderboard-list" id="leaderboardList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result" id="result">
+                <div class="carousel-nav left" id="prevBtn">
+                    <div class="chevron left"></div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="bmi-value" id="bmiValue">--</div>
+                    <div class="game-score" id="gameScore">0</div>
+                    <div class="bmi-category" id="bmiCategory">Enter details</div>
+                    <div class="game-label" id="gameLabel">Score</div>
+                </div>
+                
+                <div class="carousel-nav right" id="nextBtn">
+                    <div class="chevron right"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-row">
+            <div class="input-col">
+                <label for="age">Age (years)</label>
+                <input type="number" id="age" placeholder="25" min="1" max="120" step="1" inputmode="numeric">
+            </div>
+            
+            <div class="input-col">
+                <label for="height">Height (cm)</label>
+                <input type="number" id="height" placeholder="170" min="0" step="1" inputmode="decimal">
+            </div>
+            
+            <div class="input-col">
+                <label for="weight">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="70" min="0" step="1" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="instructions" id="instructions">
+            <div class="instructions-text">Move the hand left and right using arrow</div>
+        </div>
+        
+        <button id="mainButton">
+            <span class="button-text">Calculate BMI</span>
+            <span class="loader"></span>
+        </button>
+        <div class="game-controls" id="gameControls">
+            <button class="control-btn" id="leftBtn">◀</button>
+            <button class="control-btn" id="rightBtn">▶</button>
+        </div>
+    </div>
+    
+    <div class="footer-credit">created using AI @ 2026</div>
+
+    <div class="bio-modal" id="bioModal">
+        <div class="bio-content">
+            <button class="bio-close" id="bioClose">×</button>
+            <h2 class="bio-title">About @ghulamrusli</h2>
+            <p class="bio-text">This is a designer's attempt to create a project entirely using an AI platform (Claude).</p>
+            <p class="bio-text">This BMI calculator combines practical health tracking with a hidden food-catching game.</p>
+        </div>
+    </div>
+
+    <!-- Name Input Modal -->
+    <div class="name-modal" id="nameModal">
+        <div class="name-modal-content">
+            <div class="name-modal-title">Enter Your Name</div>
+            <div class="name-modal-subtitle">Your score will be saved to the leaderboard</div>
+            <div class="name-input-group">
+                <input type="text" id="playerNameInput" placeholder="Your name" maxlength="20" autocomplete="off">
+            </div>
+            <button class="name-submit-btn" id="nameSubmitBtn">Start Game</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const ageInput = document.getElementById('age');
+        const heightInput = document.getElementById('height');
+        const weightInput = document.getElementById('weight');
+        const mainButton = document.getElementById('mainButton');
+        const gameControls = document.getElementById('gameControls');
+        const instructions = document.getElementById('instructions');
+        const inputRow = document.querySelector('.input-row');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const nameSubmitBtn = document.getElementById('nameSubmitBtn');
+        const bmiValue = document.getElementById('bmiValue');
+        const gameScore = document.getElementById('gameScore');
+        const bmiCategory = document.getElementById('bmiCategory');
+        const gameLabel = document.getElementById('gameLabel');
+        const carouselTrack = document.getElementById('carouselTrack');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const waveformViz = document.getElementById('waveformViz');
+        const xrayPreview = document.querySelector('.xray-preview');
+        const gameArea = document.getElementById('gameArea');
+        const gameCharacter = document.getElementById('gameCharacter');
+        const gameStartMessage = document.getElementById('gameStartMessage');
+        const gameLives = document.getElementById('gameLives');
+        const lifeLostOverlay = document.getElementById('lifeLostOverlay');
+        const livesRemaining = document.getElementById('livesRemaining');
+        const overlayLives = document.getElementById('overlayLives');
+        const leaderboard = document.getElementById('leaderboard');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const shareBtn = document.getElementById('shareBtn');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const authorName = document.getElementById('authorName');
+        const bioModal = document.getElementById('bioModal');
+        const bioClose = document.getElementById('bioClose');
+
+        // BMI State
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let bmiCalculated = false;
+
+        // Game State
+        let gameState = 'idle';
+        let score = 0;
+        let lives = 3;
+        let characterX = 0;
+        let fallingItems = [];
+        let gameLoop = null;
+        let characterSpeed = 5;
+        let itemFallSpeed = 2;
+        let isMovingLeft = false;
+        let isMovingRight = false;
+        let gameTime = 0;
+        let maxItems = 1;
+        let isCatching = false;
+        let playerName = '';
+        
+        const foodItems = {
+            unhealthy: [
+                { emoji: '🍟', points: -1 },
+                { emoji: '🍔', points: -1 },
+                { emoji: '🌭', points: -1 },
+                { emoji: '🍕', points: -1 },
+                { emoji: '🍩', points: -1 }
+            ],
+            healthy: [
+                { emoji: '🍌', points: 1 },
+                { emoji: '🍎', points: 1 },
+                { emoji: '🥑', points: 1 },
+                { emoji: '🐟', points: 1 },
+                { emoji: '🍗', points: 1 }
+            ]
+        };
+        
+        const allFoods = [...foodItems.unhealthy, ...foodItems.healthy];
+        let scoreHistory = [];
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSuccessSound() {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            
+            osc.type = 'sine';
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(2000, audioContext.currentTime);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.setValueAtTime(800, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+            
+            gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.15);
+        }
+        
+        function playFailSound() {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.setValueAtTime(220, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(55, audioContext.currentTime + 0.25);
+            
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.25);
+        }
+
+        // Build human shape visualization
+        const humanShape = [
+            ['single'], ['head-middle'], ['head-middle'], ['single'],
+            ['double', 'double'], ['triple'], ['triple'], ['triple'], ['triple'],
+            ['double', 'double'], ['double', 'double'], ['double', 'double'], 
+            ['double', 'double'], ['double', 'double']
+        ];
+        
+        humanShape.forEach((row, rowIndex) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'waveform-row';
+            
+            if (rowIndex === 4) {
+                const armLeft = document.createElement('div');
+                armLeft.className = 'arm-left';
+                for (let i = 0; i < 5; i++) {
+                    const armBar = document.createElement('div');
+                    armBar.className = 'waveform-bar arm';
+                    armLeft.appendChild(armBar);
+                }
+                rowDiv.appendChild(armLeft);
+            }
+            
+            row.forEach(type => {
+                const bar = document.createElement('div');
+                bar.className = `waveform-bar ${type}`;
+                rowDiv.appendChild(bar);
+            });
+            
+            if (rowIndex === 4) {
+                const armRight = document.createElement('div');
+                armRight.className = 'arm-right';
+                for (let i = 0; i < 5; i++) {
+                    const armBar = document.createElement('div');
+                    armBar.className = 'waveform-bar arm';
+                    armRight.appendChild(armBar);
+                }
+                rowDiv.appendChild(armRight);
+            }
+            
+            waveformViz.appendChild(rowDiv);
+        });
+
+        // ===== BMI FUNCTIONS =====
+        function updateCarousel(slideIndex) {
+            currentSlide = slideIndex;
+            carouselTrack.style.transform = `translateX(-${slideIndex * 100}%)`;
+            
+            const maxSlide = bmiCalculated ? 2 : 1;
+            prevBtn.classList.toggle('disabled', slideIndex === 0);
+            nextBtn.classList.toggle('disabled', slideIndex === maxSlide);
+
+            if (slideIndex === 2) {
+                bmiValue.style.display = 'none';
+                gameScore.style.display = 'block';
+                bmiCategory.style.display = 'none';
+                gameLabel.style.display = 'block';
+                ageInput.disabled = true;
+                heightInput.disabled = true;
+                weightInput.disabled = true;
+                inputRow.style.display = 'none';
+                instructions.classList.add('active');
+                
+                const buttonText = mainButton.querySelector('.button-text');
+                
+                if (gameState === 'idle') {
+                    buttonText.textContent = 'Start Game';
+                    mainButton.setAttribute('data-text', 'Start Game');
+                    mainButton.classList.add('start-game', 'flicker-text');
+                    mainButton.classList.remove('filled');
+                    mainButton.style.display = 'block';
+                    gameControls.classList.remove('active');
+                    prevBtn.classList.remove('game-active');
+                    nextBtn.classList.remove('game-active');
+                } else if (gameState === 'gameover') {
+                    buttonText.textContent = 'Restart Game';
+                    mainButton.setAttribute('data-text', 'Restart Game');
+                    mainButton.classList.add('start-game', 'flicker-text');
+                    mainButton.classList.remove('filled');
+                    mainButton.style.display = 'block';
+                    gameControls.classList.remove('active');
+                    prevBtn.classList.remove('game-active');
+                    nextBtn.classList.remove('game-active');
+                } else if (gameState === 'paused') {
+                    buttonText.textContent = 'Continue Playing';
+                    mainButton.setAttribute('data-text', 'Continue Playing');
+                    mainButton.classList.add('start-game', 'flicker-text');
+                    mainButton.classList.remove('filled');
+                    mainButton.style.display = 'block';
+                    gameControls.classList.remove('active');
+                    prevBtn.classList.remove('game-active');
+                    nextBtn.classList.remove('game-active');
+                } else if (gameState === 'running') {
+                    mainButton.style.display = 'none';
+                    gameControls.classList.add('active');
+                    prevBtn.classList.add('game-active');
+                    nextBtn.classList.add('game-active');
+                }
+            } else {
+                bmiValue.style.display = 'block';
+                gameScore.style.display = 'none';
+                bmiCategory.style.display = 'block';
+                gameLabel.style.display = 'none';
+                ageInput.disabled = false;
+                heightInput.disabled = false;
+                weightInput.disabled = false;
+                inputRow.style.display = 'flex';
+                instructions.classList.remove('active');
+                
+                const buttonText = mainButton.querySelector('.button-text');
+                buttonText.textContent = 'Calculate BMI';
+                mainButton.setAttribute('data-text', 'Calculate BMI');
+                mainButton.classList.remove('start-game', 'flicker-text');
+                // Keep the button filled (blue) if BMI has been calculated
+                if (bmiCalculated) {
+                    mainButton.classList.add('filled');
+                }
+                mainButton.style.display = 'block';
+                gameControls.classList.remove('active');
+                prevBtn.classList.remove('game-active');
+                nextBtn.classList.remove('game-active');
+            }
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0 && !prevBtn.classList.contains('disabled')) {
+                updateCarousel(currentSlide - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const maxSlide = bmiCalculated ? 2 : 1;
+            if (currentSlide < maxSlide && !nextBtn.classList.contains('disabled')) {
+                updateCarousel(currentSlide + 1);
+            }
+        });
+
+        updateCarousel(0);
+
+        carouselTrack.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        carouselTrack.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            const threshold = 50;
+            const maxSlide = bmiCalculated ? 2 : 1;
+
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0 && currentSlide < maxSlide) {
+                    updateCarousel(currentSlide + 1);
+                } else if (diff < 0 && currentSlide > 0) {
+                    updateCarousel(currentSlide - 1);
+                }
+            }
+        });
+
+        function updateXrayBody(bmi) {
+            waveformViz.className = 'waveform';
+            
+            if (bmi < 18.5) waveformViz.classList.add('underweight');
+            else if (bmi < 25) waveformViz.classList.add('normal');
+            else if (bmi < 30) waveformViz.classList.add('overweight');
+            else waveformViz.classList.add('obese');
+        }
+
+        function createGlowingDots(category) {
+            const container = document.getElementById('rainContainer');
+            const numDots = 25;
+            
+            for (let i = 0; i < numDots; i++) {
+                setTimeout(() => {
+                    const dot = document.createElement('div');
+                    dot.className = `glow-dot ${category}`;
+                    dot.style.left = `${Math.random() * 100}%`;
+                    
+                    const duration = 1 + Math.random() * 0.8;
+                    const delay = Math.random() * 0.15;
+                    
+                    dot.style.animationDuration = `${duration}s`;
+                    dot.style.animationDelay = `${delay}s`;
+                    
+                    container.appendChild(dot);
+                    
+                    setTimeout(() => dot.remove(), (duration + delay) * 1000);
+                }, i * 60);
+            }
+        }
+
+        function calculateBMI() {
+            const age = parseFloat(ageInput.value);
+            const height = parseFloat(heightInput.value);
+            const weight = parseFloat(weightInput.value);
+
+            if (!age || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
+                bmiValue.textContent = '--';
+                bmiCategory.textContent = 'Enter all values';
+                bmiCategory.className = 'bmi-category';
+                return;
+            }
+
+            // Validate age range
+            if (age < 2 || age > 120) {
+                bmiValue.textContent = '--';
+                bmiCategory.textContent = 'Invalid age';
+                bmiCategory.className = 'bmi-category';
+                return;
+            }
+
+            // Show loading state
+            mainButton.classList.add('calculating');
+            mainButton.disabled = true;
+
+            const heightM = height / 100;
+            const bmi = weight / (heightM * heightM);
+            const bmiRounded = bmi.toFixed(1);
+
+            let category = '';
+            let categoryClass = '';
+
+            if (bmi < 18.5) {
+                category = 'Underweight';
+                categoryClass = 'underweight';
+            } else if (bmi < 25) {
+                category = 'Normal';
+                categoryClass = 'normal';
+            } else if (bmi < 30) {
+                category = 'Overweight';
+                categoryClass = 'overweight';
+            } else {
+                category = 'Obese';
+                categoryClass = 'obese';
+            }
+
+            // Add calculating animation with BMI category color
+            xrayPreview.classList.add('calculating', categoryClass);
+            
+            // Simulate calculation time with longer delay
+            setTimeout(() => {
+                bmiCalculated = true;
+                updateXrayBody(bmi);
+                updateCarousel(0);
+
+                bmiValue.textContent = bmiRounded;
+                bmiCategory.textContent = category;
+                bmiCategory.className = `bmi-category ${categoryClass}`;
+                
+                // Remove calculating class and restore button after animation completes
+                setTimeout(() => {
+                    xrayPreview.classList.remove('calculating', categoryClass);
+                    
+                    // Restore button state
+                    mainButton.classList.remove('calculating');
+                    mainButton.disabled = false;
+                    const buttonText = mainButton.querySelector('.button-text');
+                    buttonText.textContent = 'Calculate BMI';
+                }, 500);
+            }, 1500);
+        }
+
+        function updateButtonState() {
+            if (currentSlide !== 2) {
+                const age = parseFloat(ageInput.value);
+                const height = parseFloat(heightInput.value);
+                const weight = parseFloat(weightInput.value);
+                
+                if (age > 0 && height > 0 && weight > 0) {
+                    mainButton.classList.add('filled');
+                } else {
+                    mainButton.classList.remove('filled');
+                }
+            }
+        }
+
+        ageInput.addEventListener('input', updateButtonState);
+        heightInput.addEventListener('input', updateButtonState);
+        weightInput.addEventListener('input', updateButtonState);
+        ageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') calculateBMI();
+        });
+        heightInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') calculateBMI();
+        });
+        weightInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') calculateBMI();
+        });
+
+        // ===== GAME FUNCTIONS =====
+        function updateCharacterEmoji() {
+            if (isCatching) {
+                gameCharacter.textContent = '✊';
+                gameCharacter.style.fontSize = '40px';
+            } else {
+                gameCharacter.textContent = '👐';
+                gameCharacter.style.fontSize = '50px';
+            }
+        }
+
+        function updateLivesDisplay() {
+            overlayLives.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                const heart = document.createElement('span');
+                heart.textContent = '❤️';
+                overlayLives.appendChild(heart);
+            }
+        }
+
+        function initGame() {
+            const areaWidth = gameArea.offsetWidth;
+            characterX = (areaWidth - 40) / 2;
+            gameCharacter.style.left = characterX + 'px';
+            gameCharacter.style.display = 'flex';
+            score = 0;
+            lives = 3;
+            isCatching = false;
+            gameScore.textContent = score;
+            fallingItems = [];
+            gameTime = 0;
+            maxItems = 1;
+            
+            updateCharacterEmoji();
+            updateLivesDisplay();
+            
+            const existingItems = gameArea.querySelectorAll('.game-item');
+            existingItems.forEach(item => item.remove());
+            
+            const existingPopups = gameArea.querySelectorAll('.score-popup');
+            existingPopups.forEach(popup => popup.remove());
+            
+            gameArea.classList.remove('game-over');
+            leaderboard.classList.remove('active');
+            lifeLostOverlay.classList.remove('active');
+        }
+
+        function startGame() {
+            initGame();
+            
+            const areaWidth = gameArea.offsetWidth;
+            characterX = (areaWidth - 40) / 2;
+            gameCharacter.style.left = characterX + 'px';
+            
+            gameState = 'running';
+            gameStartMessage.classList.add('hidden');
+            mainButton.style.display = 'none';
+            gameControls.classList.add('active');
+            prevBtn.classList.add('game-active');
+            nextBtn.classList.add('game-active');
+            spawnItem();
+            gameLoop = requestAnimationFrame(updateGame);
+        }
+
+        function loseLife() {
+            lives--;
+            updateLivesDisplay();
+            
+            if (lives <= 0) {
+                endGame();
+            } else {
+                pauseForLifeLost();
+            }
+        }
+
+        function pauseForLifeLost() {
+            gameState = 'paused';
+            if (gameLoop) {
+                cancelAnimationFrame(gameLoop);
+                gameLoop = null;
+            }
+            
+            // Reset movement controls
+            isMovingLeft = false;
+            isMovingRight = false;
+            
+            livesRemaining.textContent = `${lives} ${lives === 1 ? 'Life' : 'Lives'} Remaining`;
+            lifeLostOverlay.classList.add('active');
+            gameControls.classList.remove('active');
+            prevBtn.classList.remove('game-active');
+            nextBtn.classList.remove('game-active');
+            
+            const buttonText = mainButton.querySelector('.button-text');
+            buttonText.textContent = 'Continue Playing';
+            mainButton.setAttribute('data-text', 'Continue Playing');
+            mainButton.classList.add('start-game', 'flicker-text');
+            mainButton.classList.remove('filled');
+            mainButton.style.display = 'block';
+        }
+
+        function continueGame() {
+            lifeLostOverlay.classList.remove('active');
+            
+            // Reset movement controls
+            isMovingLeft = false;
+            isMovingRight = false;
+            
+            const existingItems = gameArea.querySelectorAll('.game-item');
+            existingItems.forEach(item => item.remove());
+            fallingItems = [];
+            
+            // Keep character at current position, just update the style
+            gameCharacter.style.left = characterX + 'px';
+            
+            gameState = 'running';
+            mainButton.style.display = 'none';
+            gameControls.classList.add('active');
+            prevBtn.classList.add('game-active');
+            nextBtn.classList.add('game-active');
+            spawnItem();
+            gameLoop = requestAnimationFrame(updateGame);
+        }
+
+        function endGame() {
+            gameState = 'gameover';
+            if (gameLoop) {
+                cancelAnimationFrame(gameLoop);
+                gameLoop = null;
+            }
+            
+            // Reset movement controls
+            isMovingLeft = false;
+            isMovingRight = false;
+            
+            scoreHistory.push({
+                name: playerName || 'Anonymous',
+                score: score
+            });
+            
+            gameArea.classList.add('game-over');
+            gameCharacter.style.display = 'none';
+            leaderboard.classList.add('active');
+            gameStartMessage.classList.remove('hidden');
+            
+            displayLeaderboard();
+            
+            gameControls.classList.remove('active');
+            prevBtn.classList.remove('game-active');
+            nextBtn.classList.remove('game-active');
+            
+            const buttonText = mainButton.querySelector('.button-text');
+            buttonText.textContent = 'Restart Game';
+            mainButton.setAttribute('data-text', 'Restart Game');
+            mainButton.classList.add('start-game', 'flicker-text');
+            mainButton.classList.remove('filled');
+            mainButton.style.display = 'block';
+        }
+
+        function displayLeaderboard() {
+            leaderboardList.innerHTML = '';
+            
+            const sortedScores = [...scoreHistory].sort((a, b) => b.score - a.score);
+            const latestEntry = scoreHistory[scoreHistory.length - 1];
+            
+            sortedScores.forEach((entry, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                const isLatest = entry === latestEntry;
+                if (isLatest) {
+                    item.classList.add('latest');
+                }
+                
+                const rank = document.createElement('span');
+                rank.className = 'leaderboard-rank';
+                rank.textContent = `#${index + 1}`;
+                
+                const nameDisplay = document.createElement('span');
+                nameDisplay.className = 'leaderboard-name';
+                nameDisplay.textContent = entry.name;
+                nameDisplay.style.flex = '1';
+                nameDisplay.style.textAlign = 'left';
+                nameDisplay.style.marginLeft = '12px';
+                nameDisplay.style.marginRight = '12px';
+                
+                const scoreDisplay = document.createElement('span');
+                scoreDisplay.className = 'leaderboard-score';
+                scoreDisplay.textContent = entry.score;
+                
+                item.appendChild(rank);
+                item.appendChild(nameDisplay);
+                item.appendChild(scoreDisplay);
+                leaderboardList.appendChild(item);
+                
+                if (isLatest) {
+                    setTimeout(() => {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            });
+        }
+
+        function spawnItem() {
+            if (fallingItems.length >= maxItems) return;
+            
+            const item = document.createElement('div');
+            item.className = 'game-item';
+            
+            const randomFood = allFoods[Math.floor(Math.random() * allFoods.length)];
+            item.textContent = randomFood.emoji;
+            item.dataset.points = randomFood.points;
+            
+            const areaWidth = gameArea.offsetWidth;
+            const itemX = Math.random() * (areaWidth - 40);
+            
+            item.style.left = itemX + 'px';
+            item.style.top = '0px';
+            
+            gameArea.appendChild(item);
+            
+            const itemData = {
+                element: item,
+                x: itemX,
+                y: 0,
+                points: randomFood.points,
+                isHealthy: randomFood.points > 0
+            };
+            
+            fallingItems.push(itemData);
+        }
+
+        function updateGame() {
+            if (gameState !== 'running') return;
+
+            const areaWidth = gameArea.offsetWidth;
+            const areaHeight = gameArea.offsetHeight;
+
+            gameTime++;
+            
+            if (gameTime % 300 === 0 && maxItems < 4) {
+                maxItems++;
+            }
+
+            if (isMovingLeft && characterX > 0) {
+                characterX -= characterSpeed;
+            }
+            if (isMovingRight && characterX < areaWidth - 40) {
+                characterX += characterSpeed;
+            }
+            gameCharacter.style.left = characterX + 'px';
+
+            for (let i = fallingItems.length - 1; i >= 0; i--) {
+                const item = fallingItems[i];
+                item.y += itemFallSpeed;
+                item.element.style.top = item.y + 'px';
+
+                const charCenterX = characterX + 20;
+                const charCenterY = areaHeight - 10 - 20;
+                const itemCenterX = item.x + 20;
+                const itemCenterY = item.y + 20;
+
+                const distance = Math.sqrt(
+                    Math.pow(charCenterX - itemCenterX, 2) + 
+                    Math.pow(charCenterY - itemCenterY, 2)
+                );
+
+                if (distance < 40) {
+                    score += item.points;
+                    gameScore.textContent = score;
+                    
+                    isCatching = true;
+                    updateCharacterEmoji();
+                    setTimeout(() => {
+                        isCatching = false;
+                        updateCharacterEmoji();
+                    }, 200);
+                    
+                    const popup = document.createElement('div');
+                    popup.className = `score-popup ${item.points > 0 ? 'positive' : 'negative'}`;
+                    popup.textContent = item.points > 0 ? '+1' : '-1';
+                    popup.style.left = item.x + 20 + 'px';
+                    popup.style.top = item.y + 'px';
+                    gameArea.appendChild(popup);
+                    
+                    setTimeout(() => popup.remove(), 1000);
+                    
+                    if (item.isHealthy) {
+                        playSuccessSound();
+                    } else {
+                        playFailSound();
+                    }
+                    
+                    item.element.remove();
+                    fallingItems.splice(i, 1);
+                } else if (item.y + 40 > areaHeight) {
+                    item.element.remove();
+                    fallingItems.splice(i, 1);
+                    
+                    if (item.isHealthy) {
+                        loseLife();
+                        return;
+                    }
+                }
+            }
+
+            if (Math.random() < 0.02) {
+                spawnItem();
+            }
+
+            gameLoop = requestAnimationFrame(updateGame);
+        }
+
+        // Event Listeners
+        mainButton.addEventListener('click', () => {
+            if (currentSlide !== 2) {
+                calculateBMI();
+            } else {
+                if (gameState === 'idle') {
+                    // Show name modal before starting game
+                    nameModal.classList.add('active');
+                    playerNameInput.value = playerName || '';
+                    playerNameInput.focus();
+                } else if (gameState === 'gameover') {
+                    startGame();
+                } else if (gameState === 'paused') {
+                    continueGame();
+                }
+            }
+        });
+        
+        // Name modal submit handler
+        nameSubmitBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (name) {
+                playerName = name;
+                nameModal.classList.remove('active');
+                startGame();
+            }
+        });
+        
+        // Allow Enter key to submit name
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const name = playerNameInput.value.trim();
+                if (name) {
+                    playerName = name;
+                    nameModal.classList.remove('active');
+                    startGame();
+                }
+            }
+        });
+
+        leftBtn.addEventListener('mousedown', () => { isMovingLeft = true; });
+        leftBtn.addEventListener('mouseup', () => { isMovingLeft = false; });
+        leftBtn.addEventListener('mouseleave', () => { isMovingLeft = false; });
+        leftBtn.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            isMovingLeft = true; 
+        });
+        leftBtn.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            isMovingLeft = false; 
+        });
+        leftBtn.addEventListener('touchcancel', (e) => { 
+            e.preventDefault(); 
+            isMovingLeft = false; 
+        });
+
+        rightBtn.addEventListener('mousedown', () => { isMovingRight = true; });
+        rightBtn.addEventListener('mouseup', () => { isMovingRight = false; });
+        rightBtn.addEventListener('mouseleave', () => { isMovingRight = false; });
+        rightBtn.addEventListener('touchstart', (e) => { 
+            e.preventDefault(); 
+            isMovingRight = true; 
+        });
+        rightBtn.addEventListener('touchend', (e) => { 
+            e.preventDefault(); 
+            isMovingRight = false; 
+        });
+        rightBtn.addEventListener('touchcancel', (e) => { 
+            e.preventDefault(); 
+            isMovingRight = false; 
+        });
+
+        // Global touch end handler to reset controls if touch is lost
+        document.addEventListener('touchend', () => {
+            if (gameState === 'running') {
+                isMovingLeft = false;
+                isMovingRight = false;
+            }
+        });
+
+        // Reset controls when game loses focus or visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                isMovingLeft = false;
+                isMovingRight = false;
+            }
+        });
+
+        // Reset controls if touch leaves the game area
+        gameArea.addEventListener('touchleave', () => {
+            isMovingLeft = false;
+            isMovingRight = false;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (currentSlide === 2 && gameState === 'running') {
+                if (e.key === 'ArrowLeft') isMovingLeft = true;
+                if (e.key === 'ArrowRight') isMovingRight = true;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (currentSlide === 2 && gameState === 'running') {
+                if (e.key === 'ArrowLeft') isMovingLeft = false;
+                if (e.key === 'ArrowRight') isMovingRight = false;
+            }
+        });
+
+        shareBtn.addEventListener('click', async () => {
+            const shareData = {
+                title: 'BMI Calculator Game',
+                text: 'Check out this fun BMI Calculator with a food catching game!',
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('Link copied to clipboard!');
+                }
+            } catch (err) {
+                console.log('Share failed:', err);
+            }
+        });
+
+        authorName.addEventListener('click', () => {
+            bioModal.classList.add('active');
+        });
+
+        bioClose.addEventListener('click', () => {
+            bioModal.classList.remove('active');
+        });
+
+        bioModal.addEventListener('click', (e) => {
+            if (e.target === bioModal) {
+                bioModal.classList.remove('active');
+            }
+        });
+        
+        // Prevent iOS Safari bounce/scroll
+        document.body.addEventListener('touchmove', function(e) {
+            // Allow scrolling in bio modal and leaderboard
+            if (e.target.closest('.bio-content') || e.target.closest('.leaderboard')) {
+                return;
+            }
+            // Prevent default for everything else
+            if (gameState === 'running' || e.target.closest('.xray-preview')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Prevent double-tap zoom on buttons
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
