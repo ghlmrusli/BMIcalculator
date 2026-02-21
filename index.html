@@ -182,13 +182,17 @@
             z-index: 1;
             opacity: 0;
             transform: translateY(-10px);
+            -webkit-transform: translateY(-10px);
             pointer-events: none;
             transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            -webkit-transition: opacity 0.6s ease-out, -webkit-transform 0.6s ease-out;
+            will-change: opacity, transform;
         }
         
         .share-bar.visible {
             opacity: 1;
             transform: translateY(0);
+            -webkit-transform: translateY(0);
             pointer-events: all;
         }
         
@@ -1413,15 +1417,22 @@
             background:
                 linear-gradient(#FFF 0 0) left -25% top 0 /20% 100% no-repeat
                 rgba(255, 255, 255, 0.3);
+            -webkit-animation: progressBar 1s infinite steps(6);
             animation: progressBar 1s infinite steps(6);
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+            will-change: background-position;
+        }
+        
+        @-webkit-keyframes progressBar {
+            100% { background-position: right -25% top 0; }
         }
         
         @keyframes progressBar {
-            100% { background-position: right -25% top 0 }
+            100% { background-position: right -25% top 0; }
         }
         
         button.calculating {
