@@ -21,6 +21,12 @@
     <meta name="twitter:image" content="https://kira-bmi.vercel.app/og-image.png">
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -158,6 +164,55 @@
 
         .subtitle span:hover {
             opacity: 1;
+        }
+        
+        /* Share Bar */
+        .share-bar {
+            position: relative;
+            margin-top: -16px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 22px 20px 12px 20px;
+            border-radius: 0 0 16px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .share-bar.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .share-bar a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-family: 'VT323', monospace;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s ease;
+            animation: blinkText 2s ease-in-out infinite;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        
+        @keyframes blinkText {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.3; }
+        }
+        
+        .share-bar a:hover {
+            animation: none;
+            opacity: 1;
+            text-decoration: underline;
         }
 
         .bio-modal {
@@ -1619,6 +1674,11 @@
         </div>
     </div>
     
+    <!-- Share Bar -->
+    <div class="share-bar" id="shareBar">
+        <a href="#" id="shareLink">Share with friends</a>
+    </div>
+    
     <div class="footer-credit">created using AI @ 2026</div>
 
     <div class="bio-modal" id="bioModal">
@@ -1678,6 +1738,8 @@
         const authorName = document.getElementById('authorName');
         const bioModal = document.getElementById('bioModal');
         const bioClose = document.getElementById('bioClose');
+        const shareBar = document.getElementById('shareBar');
+        const shareLink = document.getElementById('shareLink');
 
         // BMI State
         let currentSlide = 0;
@@ -1827,6 +1889,9 @@
                 inputRow.style.display = 'none';
                 instructions.classList.add('active');
                 
+                // Hide share bar on game screen
+                shareBar.classList.remove('visible');
+                
                 const buttonText = mainButton.querySelector('.button-text');
                 
                 if (gameState === 'idle') {
@@ -1872,6 +1937,13 @@
                 weightInput.disabled = false;
                 inputRow.style.display = 'flex';
                 instructions.classList.remove('active');
+                
+                // Show share bar only on slide 0 (first screen) if BMI has been calculated
+                if (slideIndex === 0 && bmiCalculated) {
+                    shareBar.classList.add('visible');
+                } else {
+                    shareBar.classList.remove('visible');
+                }
                 
                 const buttonText = mainButton.querySelector('.button-text');
                 buttonText.textContent = 'Calculate BMI';
@@ -2021,6 +2093,11 @@
                     mainButton.disabled = false;
                     const buttonText = mainButton.querySelector('.button-text');
                     buttonText.textContent = 'Calculate BMI';
+                    
+                    // Show share bar with animation
+                    setTimeout(() => {
+                        shareBar.classList.add('visible');
+                    }, 300);
                 }, 500);
             }, 1500);
         }
@@ -2476,6 +2553,27 @@
             const shareData = {
                 title: 'BMI Calculator Game',
                 text: 'Check out this fun BMI Calculator with a food catching game!',
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('Link copied to clipboard!');
+                }
+            } catch (err) {
+                console.log('Share failed:', err);
+            }
+        });
+        
+        // Share bar link handler
+        shareLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const shareData = {
+                title: 'BMI Calculator',
+                text: 'Check out this BMI Calculator!',
                 url: window.location.href
             };
 
