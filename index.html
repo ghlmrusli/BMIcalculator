@@ -43,7 +43,6 @@
             font-family: 'VT323', 'Courier New', monospace;
             background: linear-gradient(135deg, #c0c0c0 0%, #e6f2ff 100%);
             min-height: 100vh;
-            min-height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -53,17 +52,14 @@
             padding-bottom: max(16px, env(safe-area-inset-bottom));
             position: relative;
             overflow-x: hidden;
-            overflow-y: auto;
             margin: 0;
         }
         
         /* iOS Safari viewport fix */
         @supports (-webkit-touch-callout: none) {
             body {
+                min-height: 100vh;
                 min-height: -webkit-fill-available;
-                padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 20px));
-                overflow-y: scroll;
-                -webkit-overflow-scrolling: touch;
             }
         }
 
@@ -112,60 +108,17 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
             position: relative;
             z-index: 2;
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-        
-        .container.flipped {
-            transform: rotateY(180deg);
         }
         
         .card-front,
         .card-back {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            -moz-backface-visibility: hidden;
-            animation: fadeIn 0.3s ease-in;
-            position: relative;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            width: 100%;
         }
         
         .card-front {
-            z-index: 2;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        
-        .container.flipped .card-front {
-            animation: none;
-            visibility: hidden;
-            z-index: 0;
-            opacity: 0;
-        }
-        
-        .container:not(.flipped) .card-front {
-            animation: fadeIn 0.4s ease-in 0.5s both;
-            visibility: visible;
-            z-index: 2;
-        }
-        
-        .container:not(.flipped) .card-back {
-            visibility: hidden;
-            z-index: 0;
-            opacity: 0;
-        }
-        
-        .container.flipped .card-back {
-            visibility: visible;
-            z-index: 2;
             opacity: 1;
+            visibility: visible;
         }
         
         .card-back {
@@ -174,7 +127,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            transform: rotateY(180deg);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -186,6 +138,18 @@
                 repeating-linear-gradient(23deg, transparent, transparent 7px, rgba(0, 0, 0, 0.01) 7px, rgba(0, 0, 0, 0.01) 8px),
                 linear-gradient(180deg, #e8e8e8 0%, #d4d4d4 100%);
             border-radius: 16px;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .container.flipped .card-front {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .container.flipped .card-back {
+            opacity: 1;
+            visibility: visible;
         }
         
         .formula-title {
@@ -366,7 +330,6 @@
             transition: opacity 1s ease-in-out, transform 1s ease-in-out;
             -webkit-transition: opacity 1s ease-in-out, -webkit-transform 1s ease-in-out;
             will-change: opacity, transform;
-            transform-style: preserve-3d;
             display: none;
             height: 0;
             overflow: hidden;
@@ -381,13 +344,10 @@
             height: auto;
         }
         
-        .container.flipped ~ .share-bar.visible {
-            transform: translateY(0) rotateY(180deg);
-            -webkit-transform: translateY(0) rotateY(180deg);
-            opacity: 0;
-            pointer-events: none;
+        .container.flipped ~ .share-bar {
             display: none;
             height: 0;
+            opacity: 0;
         }
         
         .share-bar a {
@@ -1740,16 +1700,16 @@
             body {
                 justify-content: center;
                 padding-top: 16px;
-                padding-bottom: 16px;
+                padding-bottom: 8px;
                 min-height: 100vh;
-                height: auto;
             }
             
             /* Allow scrolling if content is taller than viewport */
             @supports (-webkit-touch-callout: none) {
                 body {
                     justify-content: flex-start;
-                    padding-top: max(24px, env(safe-area-inset-top));
+                    padding-top: max(20px, env(safe-area-inset-top));
+                    padding-bottom: max(8px, env(safe-area-inset-bottom));
                 }
             }
             
@@ -1763,8 +1723,8 @@
             }
             
             .footer-credit {
-                margin-top: 12px;
-                margin-bottom: 8px;
+                margin-top: 8px;
+                margin-bottom: 0;
             }
             
             .carousel-nav {
@@ -2892,7 +2852,7 @@
             }
         });
 
-        // Card flip functionality
+        // Card flip functionality - using fade instead of 3D flip
         cardTitle.addEventListener('click', () => {
             // Disable flip when on BMI table (slide 1) or game screen (slide 2)
             if (currentSlide === 1 || currentSlide === 2) return;
@@ -2905,7 +2865,7 @@
                     if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
                         shareBar.classList.add('visible');
                     }
-                }, 1000); // Wait for 1s flip animation to complete
+                }, 500); // Wait for 0.5s fade animation to complete
             } else {
                 shareBar.classList.remove('visible');
             }
@@ -2920,7 +2880,7 @@
                     if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
                         shareBar.classList.add('visible');
                     }
-                }, 1000);
+                }, 500);
             } else {
                 shareBar.classList.remove('visible');
             }
@@ -2935,7 +2895,7 @@
                     if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
                         shareBar.classList.add('visible');
                     }
-                }, 1000);
+                }, 500);
             } else {
                 shareBar.classList.remove('visible');
             }
