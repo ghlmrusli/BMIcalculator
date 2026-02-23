@@ -39,10 +39,19 @@
             -webkit-touch-callout: none;
         }
 
+        html {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'VT323', 'Courier New', monospace;
             background: linear-gradient(135deg, #c0c0c0 0%, #e6f2ff 100%);
+            background-attachment: fixed;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -50,7 +59,6 @@
             padding: 16px;
             padding-top: max(16px, env(safe-area-inset-top));
             padding-bottom: max(16px, env(safe-area-inset-bottom));
-            position: relative;
             overflow-x: hidden;
             margin: 0;
         }
@@ -62,15 +70,18 @@
                 min-height: -webkit-fill-available;
             }
         }
-
-        html {
-            height: 100%;
-            overflow-x: hidden;
-        }
         
         .footer-credit {
             margin-top: 16px;
             margin-bottom: 0;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 100%;
         }
 
         body::before {
@@ -1700,22 +1711,12 @@
             body {
                 justify-content: center;
                 padding-top: 16px;
-                padding-bottom: 8px;
+                padding-bottom: 16px;
                 min-height: 100vh;
             }
             
-            /* Allow scrolling if content is taller than viewport */
-            @supports (-webkit-touch-callout: none) {
-                body {
-                    justify-content: flex-start;
-                    padding-top: max(20px, env(safe-area-inset-top));
-                    padding-bottom: max(8px, env(safe-area-inset-bottom));
-                }
-            }
-            
             .container {
-                margin-top: 0;
-                margin-bottom: 0;
+                margin: auto 0;
             }
             
             .share-bar {
@@ -1755,6 +1756,7 @@
     </style>
 </head>
 <body>
+    <div class="content-wrapper">
     <div class="container" id="mainCard">
         <div class="card-front">
         <h1 id="cardTitle">BMI Calculator</h1>
@@ -1926,6 +1928,7 @@
     </div>
     
     <div class="footer-credit">created using AI @ 2026</div>
+    </div><!-- end content-wrapper -->
 
     <div class="bio-modal" id="bioModal">
         <div class="bio-content">
