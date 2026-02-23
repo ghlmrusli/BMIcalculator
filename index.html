@@ -60,11 +60,17 @@
         @supports (-webkit-touch-callout: none) {
             body {
                 min-height: -webkit-fill-available;
+                padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 20px));
             }
         }
 
         html {
             height: 100%;
+        }
+        
+        .footer-credit {
+            margin-top: 16px;
+            margin-bottom: 0;
         }
 
         body::before {
@@ -2157,8 +2163,8 @@
                 inputRow.style.display = 'flex';
                 instructions.classList.remove('active');
                 
-                // Show share bar only on slide 0 (first screen) if BMI has been calculated
-                if (slideIndex === 0 && bmiCalculated) {
+                // Show share bar only on slide 0 (first screen) if BMI has been calculated and card is not flipped
+                if (slideIndex === 0 && bmiCalculated && !mainCard.classList.contains('flipped')) {
                     shareBar.classList.add('visible');
                 } else {
                     shareBar.classList.remove('visible');
@@ -2822,6 +2828,9 @@
 
         // Card flip functionality
         cardTitle.addEventListener('click', () => {
+            // Disable flip when on game screen (slide 2)
+            if (currentSlide === 2) return;
+            
             mainCard.classList.toggle('flipped');
         });
         
