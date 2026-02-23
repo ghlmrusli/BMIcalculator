@@ -330,10 +330,13 @@
             transform: translateY(-10px);
             -webkit-transform: translateY(-10px);
             pointer-events: none;
-            transition: opacity 0.6s ease-out, transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-            -webkit-transition: opacity 0.6s ease-out, -webkit-transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            -webkit-transition: opacity 1s ease-in-out, -webkit-transform 1s ease-in-out;
             will-change: opacity, transform;
             transform-style: preserve-3d;
+            display: none;
+            height: 0;
+            overflow: hidden;
         }
         
         .share-bar.visible {
@@ -341,6 +344,8 @@
             transform: translateY(0);
             -webkit-transform: translateY(0);
             pointer-events: all;
+            display: block;
+            height: auto;
         }
         
         .container.flipped ~ .share-bar.visible {
@@ -348,6 +353,8 @@
             -webkit-transform: translateY(0) rotateY(180deg);
             opacity: 0;
             pointer-events: none;
+            display: none;
+            height: 0;
         }
         
         .share-bar a {
@@ -1692,14 +1699,33 @@
         /* Better touch targets on all mobile devices */
         @media (max-width: 480px) {
             body {
-                justify-content: flex-start;
-                padding-top: 24px;
+                justify-content: center;
+                padding-top: 16px;
+                padding-bottom: 16px;
                 min-height: 100vh;
                 height: auto;
             }
             
+            /* Allow scrolling if content is taller than viewport */
+            @supports (-webkit-touch-callout: none) {
+                body {
+                    justify-content: flex-start;
+                    padding-top: max(24px, env(safe-area-inset-top));
+                }
+            }
+            
             .container {
                 margin-top: 0;
+                margin-bottom: 0;
+            }
+            
+            .share-bar {
+                margin-bottom: 0;
+            }
+            
+            .footer-credit {
+                margin-top: 12px;
+                margin-bottom: 8px;
             }
             
             .carousel-nav {
@@ -2828,18 +2854,51 @@
 
         // Card flip functionality
         cardTitle.addEventListener('click', () => {
-            // Disable flip when on game screen (slide 2)
-            if (currentSlide === 2) return;
+            // Disable flip when on BMI table (slide 1) or game screen (slide 2)
+            if (currentSlide === 1 || currentSlide === 2) return;
             
             mainCard.classList.toggle('flipped');
+            
+            // If flipping to front and on slide 0, show share bar after animation
+            if (!mainCard.classList.contains('flipped') && bmiCalculated && currentSlide === 0) {
+                setTimeout(() => {
+                    if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
+                        shareBar.classList.add('visible');
+                    }
+                }, 1000); // Wait for 1s flip animation to complete
+            } else {
+                shareBar.classList.remove('visible');
+            }
         });
         
         formulaTitle.addEventListener('click', () => {
             mainCard.classList.toggle('flipped');
+            
+            // If flipping to front and on slide 0, show share bar after animation
+            if (!mainCard.classList.contains('flipped') && bmiCalculated && currentSlide === 0) {
+                setTimeout(() => {
+                    if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
+                        shareBar.classList.add('visible');
+                    }
+                }, 1000);
+            } else {
+                shareBar.classList.remove('visible');
+            }
         });
         
         flipBackBtn.addEventListener('click', () => {
             mainCard.classList.toggle('flipped');
+            
+            // If flipping to front and on slide 0, show share bar after animation
+            if (!mainCard.classList.contains('flipped') && bmiCalculated && currentSlide === 0) {
+                setTimeout(() => {
+                    if (!mainCard.classList.contains('flipped') && currentSlide === 0) {
+                        shareBar.classList.add('visible');
+                    }
+                }, 1000);
+            } else {
+                shareBar.classList.remove('visible');
+            }
         });
 
         bioClose.addEventListener('click', () => {
