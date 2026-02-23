@@ -53,6 +53,7 @@
             padding-bottom: max(16px, env(safe-area-inset-bottom));
             position: relative;
             overflow-x: hidden;
+            overflow-y: auto;
             margin: 0;
         }
         
@@ -61,11 +62,14 @@
             body {
                 min-height: -webkit-fill-available;
                 padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 20px));
+                overflow-y: scroll;
+                -webkit-overflow-scrolling: touch;
             }
         }
 
         html {
             height: 100%;
+            overflow-x: hidden;
         }
         
         .footer-credit {
@@ -110,6 +114,7 @@
             z-index: 2;
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
+            perspective: 1000px;
         }
         
         .container.flipped {
@@ -120,7 +125,13 @@
         .card-back {
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
             animation: fadeIn 0.3s ease-in;
+            position: relative;
+        }
+        
+        .card-front {
+            z-index: 2;
         }
         
         @keyframes fadeIn {
@@ -134,10 +145,27 @@
         
         .container.flipped .card-front {
             animation: none;
+            visibility: hidden;
+            z-index: 0;
+            opacity: 0;
         }
         
         .container:not(.flipped) .card-front {
             animation: fadeIn 0.4s ease-in 0.5s both;
+            visibility: visible;
+            z-index: 2;
+        }
+        
+        .container:not(.flipped) .card-back {
+            visibility: hidden;
+            z-index: 0;
+            opacity: 0;
+        }
+        
+        .container.flipped .card-back {
+            visibility: visible;
+            z-index: 2;
+            opacity: 1;
         }
         
         .card-back {
@@ -153,6 +181,11 @@
             align-items: center;
             padding: 40px 30px;
             box-sizing: border-box;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0, 0, 0, 0.015) 3px, rgba(0, 0, 0, 0.015) 5px),
+                repeating-linear-gradient(23deg, transparent, transparent 7px, rgba(0, 0, 0, 0.01) 7px, rgba(0, 0, 0, 0.01) 8px),
+                linear-gradient(180deg, #e8e8e8 0%, #d4d4d4 100%);
+            border-radius: 16px;
         }
         
         .formula-title {
@@ -1616,6 +1649,12 @@
         
         button.calculating .button-text {
             opacity: 0;
+            visibility: hidden;
+        }
+        
+        button .button-text {
+            opacity: 1;
+            visibility: visible;
         }
         
         button.calculating .loader {
@@ -2344,6 +2383,7 @@
                     mainButton.disabled = false;
                     const buttonText = mainButton.querySelector('.button-text');
                     buttonText.textContent = 'Calculate BMI';
+                    buttonText.style.opacity = '1'; // Explicitly restore opacity
                     
                     // Show share bar with animation
                     setTimeout(() => {
